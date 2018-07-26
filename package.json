@@ -10,7 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "string-builder": "^0.1.5",
-    "telegram-node-bot": "^4.0.5"
+    "telegraf": "^3.21.2"
   }
 }

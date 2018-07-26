@@ -1,34 +1,77 @@
-'use strict';
+const Ttoken = '604361708:AAHvDAiExKV-nJWBWX2GxISQQDlweKeHX-A';
+const Telegraf = require('telegraf')
+const Extra = require('telegraf/extra')
+const Markup = require('telegraf/markup')
 
-const Telegram = require('telegram-node-bot');
-const TelegramBaseController = Telegram.TelegramBaseController;
-const TextCommand = Telegram.TextCommand;
-const tg = new Telegram.Telegram('604361708:AAHvDAiExKV-nJWBWX2GxISQQDlweKeHX-A',{
-	workers: 1
-});
+const session = require('telegraf/session')
+const Stage = require('telegraf/stage')
+const Scene = require('telegraf/scenes/base')
+const { enter, leave } = Stage
 
-const StartController = require('./controllers/start');
-const MenuController = require('./controllers/menu');
-const PingController = require('./controllers/ping');
-const YoasimController = require('./controllers/yoasim');
-const OtherwiseController = require('./controllers/otherwise');
+const keyboard = Markup.inlineKeyboard([
+	// Markup.urlButton('❤️', 'http://telegraf.js.org'),
+	Markup.urlButton('ישירות ליוע"סים', 'https://t.me/Yoasim'),
+
+	Markup.callbackButton('לערוץ היוע"סים עם הודעה מקדימה', 'yoasim'),
+
+	Markup.callbackButton('לערוץ יוע"סים - תרפיה ואינטגרציה', 'yoasimpt'),
+	Markup.callbackButton('בעצם התחרטתי', 'delete')
+	],
+	{
+		columns: 1
+	})
+
+const bot = new Telegraf(Ttoken)
+bot.start((ctx) => {
+	ctx.reply('ברוכים הבאים ליוע"סים, להלן רשימת האופציות:', Extra.markup(keyboard))
+})
+
+bot.help((ctx) => ctx.reply('Help message'))
 
 
-tg.router
-	.when(
-		new TextCommand('/start', 'startCommand'),
-		new StartController()
-	)	
-	.when(
-		new TextCommand('/menu', 'menuCommand'),
-		new MenuController()
-	)		
-	.when(
-        new TextCommand('ping', 'pingCommand'),
-        new PingController()
+
+bot.on('message', (ctx) => {
+	// ctx.telegram.sendCopy(ctx.from.id, ctx.message, Extra.markup(keyboard))
+	ctx.reply('אנא בחר אחת מהאופציות...', Extra.markup(keyboard))
+})
+
+bot.action('delete', ({ deleteMessage }) => deleteMessage())
+
+bot.action('tooscared', (ctx) => ctx.reply('הכל טוב, כאן מקבלים את כולם'))
+
+
+// bot.action('yoasim', (ctx) => ctx.editMessageText('🎉 Awesome! 🎉 goto @yoasim'))
+bot.action('yoasim', (ctx) => {
+	
+	ctx.editMessageText('🎉 מעולה! 🎉 חשוב שתקרא את החוקים בטרם כניסתך לקבוצה!',
+		Extra.markup(
+			Markup.inlineKeyboard([
+				Markup.urlButton('ישירות ליוע"סים', 'https://t.me/Yoasim'),
+				Markup.callbackButton('לא לא מפחיד מדי', 'tooscared'),				
+			],
+			{
+				columns: 1
+			})
+		)
 	)
-	.when(
-		new TextCommand('/yoasim','yoasimCommand'),
-		new YoasimController()
+})
+
+bot.action('yoasimpt', (ctx) => {
+	
+	ctx.editMessageText('כאן תוכלו להתייעץ איתנו בכל נושא התרפיה העצמית עם פסיכדלים, כמו גם על האינטגרציה לחיי היומיום.',
+		Extra.markup(
+			Markup.inlineKeyboard([
+				Markup.urlButton('קח אותי לשם', 'https://t.me/YoasimPT')
+			],
+			{
+				columns: 1
+			})
+		)
 	)
-	.otherwise(new OtherwiseController());
+})
+
+
+
+bot.startPolling()
+
+
